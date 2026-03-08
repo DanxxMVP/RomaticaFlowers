@@ -1,0 +1,63 @@
+/* ============================================
+   HEART — Floating heart particles
+   ============================================ */
+
+.heart {
+  position: absolute;
+  font-size: 14px;
+  opacity: 0;
+  pointer-events: none;
+  animation: heartFloat var(--float-duration, 6s) ease-in-out forwards;
+  filter: blur(0.3px);
+  z-index: 5;
+}
+
+/* Heart shape built with CSS */
+.heart-shape {
+  position: relative;
+  width: var(--heart-size, 12px);
+  height: var(--heart-size, 12px);
+  transform: rotate(-45deg);
+}
+
+.heart-shape::before,
+.heart-shape::after {
+  content: '';
+  position: absolute;
+  width: var(--heart-size, 12px);
+  height: var(--heart-size, 12px);
+  border-radius: 50%;
+  background: var(--heart-color, rgba(230, 140, 180, 0.7));
+}
+
+.heart-shape::before {
+  top: calc(var(--heart-size, 12px) * -0.5);
+  left: 0;
+}
+
+.heart-shape::after {
+  top: 0;
+  left: calc(var(--heart-size, 12px) * 0.5);
+}
+
+@keyframes heartFloat {
+  0% {
+    opacity: 0;
+    transform: translateY(0) translateX(0) scale(0.4);
+  }
+  10% {
+    opacity: var(--heart-opacity, 0.6);
+    transform: translateY(-10px) translateX(3px) scale(0.8);
+  }
+  50% {
+    opacity: var(--heart-opacity, 0.6);
+    transform: translateY(-80px) translateX(var(--drift-x, -15px)) scale(1);
+  }
+  90% {
+    opacity: 0.15;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-160px) translateX(var(--drift-end, 10px)) scale(0.6);
+  }
+}

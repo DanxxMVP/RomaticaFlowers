@@ -1,0 +1,64 @@
+/* ============================================
+   SPARKLE — Twinkling sparkle/bubble particles
+   ============================================ */
+
+.sparkle {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  animation: sparklePulse var(--sparkle-duration, 3s) ease-in-out infinite;
+  z-index: 4;
+}
+
+/* Sparkle glow ring */
+.sparkle::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--sparkle-glow, rgba(255, 255, 255, 0.15)), transparent 70%);
+}
+
+@keyframes sparklePulse {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  50% {
+    opacity: var(--sparkle-opacity, 0.7);
+    transform: scale(1);
+  }
+}
+
+/* Bubble variant */
+.sparkle.bubble {
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: radial-gradient(
+    circle at 30% 30%,
+    rgba(255, 255, 255, 0.12),
+    rgba(200, 180, 220, 0.05)
+  );
+  animation: bubbleFloat 7s ease-in-out infinite;
+}
+
+@keyframes bubbleFloat {
+  0%, 100% {
+    opacity: 0;
+    transform: translateY(0) scale(0.6);
+  }
+  20% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.35;
+    transform: translateY(-30px) scale(1);
+  }
+  80% {
+    opacity: 0.15;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-60px) scale(0.8);
+  }
+}
