@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const introHearts = Array.from({ length: 25 }, (_, i) => {
   const seed = Math.sin(i * 7.3 + 2.1) * 10000;
@@ -24,6 +24,25 @@ const introStars = Array.from({ length: 60 }, (_, i) => ({
 
 export default function IntroScreen({ onStart }) {
   const [leaving, setLeaving] = useState(false);
+  const [winW, setWinW] = useState(typeof window !== 'undefined' ? window.innerWidth : 400);
+
+  useEffect(() => {
+    const onResize = () => setWinW(window.innerWidth);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  // Florecitas responsivas: azul, amarillo, rosa
+  const flowerColors = ['#4a90d9', '#ffd700', '#ff8ec4'];
+  const flowerOffsets = [];
+  const spacing = 35;
+  const half = winW / 2;
+  // Lado izquierdo
+  for (let x = -55; x >= -(half - 20); x -= spacing) flowerOffsets.unshift(x);
+  // Lado derecho (saltar zona del regalo ~65-105)
+  for (let x = 55; x <= half - 20; x += spacing) {
+    if (x < 65 || x > 105) flowerOffsets.push(x);
+  }
 
   const handleClick = () => {
     setLeaving(true);
@@ -174,7 +193,7 @@ export default function IntroScreen({ onStart }) {
         /* ========== OSITO ========== */
         .intro-bear {
           position: absolute;
-          bottom: 40px;
+          bottom: 30px;
           left: 50%;
           transform: translateX(-50%);
           z-index: 3;
@@ -187,8 +206,8 @@ export default function IntroScreen({ onStart }) {
 
         .bear-body {
           position: relative;
-          width: 120px;
-          height: 110px;
+          width: 160px;
+          height: 150px;
         }
 
         /* Head */
@@ -197,8 +216,8 @@ export default function IntroScreen({ onStart }) {
           top: 0;
           left: 50%;
           transform: translateX(-50%);
-          width: 72px;
-          height: 64px;
+          width: 96px;
+          height: 86px;
           border-radius: 50%;
           background: radial-gradient(circle at 40% 35%, #c4956a, #a07050);
           z-index: 2;
@@ -207,49 +226,49 @@ export default function IntroScreen({ onStart }) {
         /* Ears */
         .bear-ear-l, .bear-ear-r {
           position: absolute;
-          top: -6px;
-          width: 28px;
-          height: 28px;
+          top: -8px;
+          width: 38px;
+          height: 38px;
           border-radius: 50%;
           background: #a07050;
           z-index: 1;
         }
-        .bear-ear-l { left: 50%; transform: translateX(-44px); }
-        .bear-ear-r { left: 50%; transform: translateX(16px); }
+        .bear-ear-l { left: 50%; transform: translateX(-58px); }
+        .bear-ear-r { left: 50%; transform: translateX(20px); }
 
         .bear-ear-inner-l, .bear-ear-inner-r {
           position: absolute;
           top: -2px;
-          width: 16px;
-          height: 16px;
+          width: 22px;
+          height: 22px;
           border-radius: 50%;
           background: #d4a882;
           z-index: 2;
         }
-        .bear-ear-inner-l { left: 50%; transform: translateX(-38px); }
-        .bear-ear-inner-r { left: 50%; transform: translateX(22px); }
+        .bear-ear-inner-l { left: 50%; transform: translateX(-50px); }
+        .bear-ear-inner-r { left: 50%; transform: translateX(28px); }
 
         /* Eyes */
         .bear-eye-l, .bear-eye-r {
           position: absolute;
-          top: 22px;
-          width: 10px;
-          height: 12px;
+          top: 30px;
+          width: 13px;
+          height: 16px;
           border-radius: 50%;
           background: #2a1a0a;
           z-index: 3;
         }
-        .bear-eye-l { left: 50%; transform: translateX(-24px); }
-        .bear-eye-r { left: 50%; transform: translateX(14px); }
+        .bear-eye-l { left: 50%; transform: translateX(-32px); }
+        .bear-eye-r { left: 50%; transform: translateX(18px); }
 
         /* Nose */
         .bear-nose {
           position: absolute;
-          top: 34px;
+          top: 46px;
           left: 50%;
           transform: translateX(-50%);
-          width: 16px;
-          height: 10px;
+          width: 22px;
+          height: 14px;
           border-radius: 50%;
           background: #3a2010;
           z-index: 3;
@@ -258,11 +277,11 @@ export default function IntroScreen({ onStart }) {
         /* Mouth */
         .bear-mouth {
           position: absolute;
-          top: 42px;
+          top: 56px;
           left: 50%;
           transform: translateX(-50%);
-          width: 20px;
-          height: 10px;
+          width: 26px;
+          height: 14px;
           border-bottom: 3px solid #3a2010;
           border-radius: 0 0 50% 50%;
           z-index: 3;
@@ -274,8 +293,8 @@ export default function IntroScreen({ onStart }) {
           bottom: 0;
           left: 50%;
           transform: translateX(-50%);
-          width: 68px;
-          height: 60px;
+          width: 92px;
+          height: 82px;
           border-radius: 40% 40% 50% 50%;
           background: radial-gradient(circle at 40% 30%, #c4956a, #a07050);
         }
@@ -283,11 +302,11 @@ export default function IntroScreen({ onStart }) {
         /* Belly */
         .bear-belly {
           position: absolute;
-          bottom: 10px;
+          bottom: 14px;
           left: 50%;
           transform: translateX(-50%);
-          width: 40px;
-          height: 32px;
+          width: 54px;
+          height: 44px;
           border-radius: 50%;
           background: #d4b896;
           z-index: 1;
@@ -296,11 +315,11 @@ export default function IntroScreen({ onStart }) {
         /* Arms */
         .bear-arm-l {
           position: absolute;
-          bottom: 20px;
+          bottom: 28px;
           left: 50%;
-          transform: translateX(-46px) rotate(12deg);
-          width: 22px;
-          height: 38px;
+          transform: translateX(-62px) rotate(12deg);
+          width: 30px;
+          height: 52px;
           border-radius: 50%;
           background: #a07050;
           animation: bearWaveArm 1.5s ease-in-out infinite;
@@ -308,11 +327,11 @@ export default function IntroScreen({ onStart }) {
         }
         .bear-arm-r {
           position: absolute;
-          bottom: 20px;
+          bottom: 28px;
           left: 50%;
-          transform: translateX(24px) rotate(-12deg);
-          width: 22px;
-          height: 38px;
+          transform: translateX(32px) rotate(-12deg);
+          width: 30px;
+          height: 52px;
           border-radius: 50%;
           background: #a07050;
         }
@@ -320,22 +339,22 @@ export default function IntroScreen({ onStart }) {
         /* Feet */
         .bear-foot-l, .bear-foot-r {
           position: absolute;
-          bottom: -8px;
-          width: 28px;
-          height: 16px;
+          bottom: -10px;
+          width: 38px;
+          height: 22px;
           border-radius: 50%;
           background: #8a6040;
         }
-        .bear-foot-l { left: 50%; transform: translateX(-34px); }
-        .bear-foot-r { left: 50%; transform: translateX(6px); }
+        .bear-foot-l { left: 50%; transform: translateX(-46px); }
+        .bear-foot-r { left: 50%; transform: translateX(8px); }
 
         /* Heart on bear belly */
         .bear-heart {
           position: absolute;
-          bottom: 12px;
+          bottom: 16px;
           left: 50%;
           transform: translateX(-50%);
-          font-size: 24px;
+          font-size: 32px;
           color: #e83050;
           animation: bearHeartPulse 1.2s ease-in-out infinite;
           z-index: 4;
@@ -347,8 +366,8 @@ export default function IntroScreen({ onStart }) {
         }
 
         @keyframes bearWaveArm {
-          0%, 100% { transform: translateX(-46px) rotate(12deg); }
-          50% { transform: translateX(-46px) rotate(-10deg); }
+          0%, 100% { transform: translateX(-62px) rotate(12deg); }
+          50% { transform: translateX(-62px) rotate(-10deg); }
         }
 
         @keyframes bearHeartPulse {
@@ -369,6 +388,216 @@ export default function IntroScreen({ onStart }) {
         @keyframes introFadeOut {
           0% { opacity: 1; }
           100% { opacity: 0; }
+        }
+
+        /* ========== CÉSPED ========== */
+        .intro-grass-wrap {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          width: 100%;
+          height: 70px;
+          z-index: 2;
+          overflow: hidden;
+        }
+
+        .intro-grass-ground {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          width: 100%;
+          height: 28px;
+          background: linear-gradient(to top, #0c2e16, #153f24 50%, #1a5530);
+        }
+
+        .intro-grass-svg {
+          position: absolute;
+          bottom: 22px;
+          left: 0;
+          width: 100%;
+          height: 50px;
+        }
+
+        /* ========== FLORECITAS ========== */
+        .intro-mini-flower {
+          position: absolute;
+          bottom: 30px;
+          z-index: 3;
+          animation: miniFlowerSway 3s ease-in-out infinite;
+        }
+
+        .mini-stem {
+          width: 2px;
+          height: 20px;
+          background: #2cc56b;
+          margin: 0 auto;
+          border-radius: 2px;
+        }
+
+        .mini-petals {
+          position: relative;
+          width: 16px;
+          height: 16px;
+          margin: 0 auto -2px;
+        }
+
+        .mini-petal {
+          position: absolute;
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+        }
+        .mini-petal.mp1 { top: 0; left: 50%; transform: translateX(-50%); }
+        .mini-petal.mp2 { top: 4px; left: 0; }
+        .mini-petal.mp3 { top: 4px; right: 0; }
+        .mini-petal.mp4 { bottom: 0; left: 50%; transform: translateX(-50%); }
+
+        .mini-petal-center {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 5px;
+          height: 5px;
+          border-radius: 50%;
+          background: #ffd76f;
+        }
+
+        @keyframes miniFlowerSway {
+          0%, 100% { transform: rotate(-3deg); }
+          50% { transform: rotate(3deg); }
+        }
+
+        /* ========== LUCIÉRNAGAS ========== */
+        .intro-firefly {
+          position: absolute;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(255,230,100,0.9), rgba(255,200,50,0.3) 60%, transparent 80%);
+          animation: fireflyFloat ease-in-out infinite;
+          pointer-events: none;
+          z-index: 5;
+        }
+
+        @keyframes fireflyFloat {
+          0% { transform: translate(0, 0) scale(0.8); opacity: 0.3; }
+          25% { transform: translate(8px, -12px) scale(1.1); opacity: 1; }
+          50% { transform: translate(-5px, -20px) scale(0.9); opacity: 0.6; }
+          75% { transform: translate(10px, -8px) scale(1.2); opacity: 1; }
+          100% { transform: translate(0, 0) scale(0.8); opacity: 0.3; }
+        }
+
+        /* ========== REGALO ========== */
+        .intro-gift {
+          position: absolute;
+          bottom: 30px;
+          left: 50%;
+          transform: translateX(100px);
+          z-index: 3;
+          animation: giftBounce 2s ease-in-out infinite;
+        }
+
+        .gift-box {
+          position: relative;
+          width: 52px;
+          height: 40px;
+          background: linear-gradient(135deg, #e84080, #d43070);
+          border-radius: 3px;
+          box-shadow: 0 2px 8px rgba(200,50,100,0.3);
+        }
+
+        .gift-ribbon-v {
+          position: absolute;
+          top: 0;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 8px;
+          height: 100%;
+          background: #ffd700;
+          border-radius: 1px;
+        }
+
+        .gift-ribbon-h {
+          position: absolute;
+          top: 50%;
+          left: 0;
+          transform: translateY(-50%);
+          width: 100%;
+          height: 8px;
+          background: #ffd700;
+          border-radius: 1px;
+        }
+
+        .gift-lid {
+          position: absolute;
+          top: -10px;
+          left: -4px;
+          width: 60px;
+          height: 14px;
+          background: linear-gradient(135deg, #f04888, #e04080);
+          border-radius: 3px 3px 0 0;
+          box-shadow: 0 -1px 4px rgba(200,50,100,0.2);
+        }
+
+        .gift-bow {
+          position: absolute;
+          top: -20px;
+          left: 50%;
+          transform: translateX(-50%);
+          font-size: 18px;
+        }
+
+        @keyframes giftBounce {
+          0%, 100% { transform: translateX(100px) translateY(0); }
+          50% { transform: translateX(100px) translateY(-4px); }
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 500px) {
+          .intro-bear { bottom: 22px; }
+          .bear-body { transform: scale(0.7); transform-origin: bottom center; }
+          .intro-gift { bottom: 22px; transform: translateX(70px); }
+          .gift-box { transform: scale(0.8); transform-origin: bottom center; }
+          @keyframes giftBounce {
+            0%, 100% { transform: translateX(70px) translateY(0); }
+            50% { transform: translateX(70px) translateY(-4px); }
+          }
+          .intro-moon { width: 50px; height: 50px; top: 20px; right: 20px; }
+          .intro-moonGlow { width: 90px; height: 90px; top: 10px; right: 10px; }
+          .intro-mini-flower { bottom: 22px; }
+          .intro-grass-wrap { height: 55px; }
+          .intro-grass-ground { height: 22px; }
+          .intro-grass-svg { height: 38px; bottom: 16px; }
+          .intro-content h1 { font-size: 1.4rem; }
+          .intro-content p { font-size: 0.85rem; }
+          .intro-btn { padding: 10px 36px; font-size: 1rem; }
+        }
+
+        @media (max-width: 360px) {
+          .intro-bear { bottom: 18px; }
+          .bear-body { transform: scale(0.55); }
+          .intro-gift { transform: translateX(55px); bottom: 18px; }
+          .gift-box { transform: scale(0.65); }
+          @keyframes giftBounce {
+            0%, 100% { transform: translateX(55px) translateY(0); }
+            50% { transform: translateX(55px) translateY(-4px); }
+          }
+          .intro-mini-flower { bottom: 18px; }
+          .intro-grass-wrap { height: 45px; }
+          .intro-grass-ground { height: 18px; }
+          .intro-grass-svg { height: 30px; bottom: 14px; }
+          .intro-moon { width: 40px; height: 40px; top: 15px; right: 12px; }
+          .intro-moonGlow { width: 70px; height: 70px; top: 8px; right: 6px; }
+        }
+
+        @media (min-width: 1200px) {
+          .bear-body { transform: scale(1.15); transform-origin: bottom center; }
+          .gift-box { transform: scale(1.1); transform-origin: bottom center; }
+          .intro-grass-wrap { height: 85px; }
+          .intro-grass-ground { height: 34px; }
+          .intro-grass-svg { height: 60px; bottom: 28px; }
+          .intro-mini-flower { bottom: 38px; }
+          .intro-bear { bottom: 38px; }
+          .intro-gift { bottom: 38px; }
         }
       `}</style>
 
@@ -436,6 +665,80 @@ export default function IntroScreen({ onStart }) {
             <div className="bear-foot-r" />
             <div className="bear-heart">❤</div>
           </div>
+        </div>
+
+        {/* Regalo */}
+        <div className="intro-gift">
+          <div className="gift-box">
+            <div className="gift-lid" />
+            <div className="gift-ribbon-v" />
+            <div className="gift-ribbon-h" />
+            <div className="gift-bow">🎀</div>
+          </div>
+        </div>
+
+        {/* Florecitas */}
+        {flowerOffsets.map((offset, i) => {
+          const c = flowerColors[i % 3];
+          const sizes = [1, 0.7, 1.2, 0.6, 1.1, 0.8, 1.3, 0.65, 0.9, 1.15];
+          const s = sizes[i % sizes.length];
+          const stemH = Math.round(20 * s);
+          return (
+            <div key={i} className="intro-mini-flower" style={{ left: `calc(50% + ${offset}px)`, animationDelay: `${(i * 0.4) % 3}s`, transform: `scale(${s})`, transformOrigin: 'bottom center' }}>
+              <div className="mini-petals">
+                <div className="mini-petal mp1" style={{ background: c }} />
+                <div className="mini-petal mp2" style={{ background: c }} />
+                <div className="mini-petal mp3" style={{ background: c }} />
+                <div className="mini-petal mp4" style={{ background: c }} />
+                <div className="mini-petal-center" />
+              </div>
+              <div className="mini-stem" style={{ height: `${stemH}px` }} />
+            </div>
+          );
+        })}
+
+        {/* Luciérnagas */}
+        {[{l:'20%',b:'12%',s:6,d:3,dl:0},{l:'75%',b:'15%',s:5,d:3.5,dl:0.8},{l:'35%',b:'18%',s:4,d:4,dl:1.5},{l:'60%',b:'10%',s:5,d:3.2,dl:0.4},{l:'45%',b:'20%',s:3,d:4.5,dl:2},{l:'80%',b:'13%',s:4,d:3.8,dl:1.2},{l:'12%',b:'16%',s:5,d:3.3,dl:0.6}].map((f, i) => (
+          <span
+            key={i}
+            className="intro-firefly"
+            style={{
+              left: f.l,
+              bottom: f.b,
+              width: `${f.s}px`,
+              height: `${f.s}px`,
+              animationDuration: `${f.d}s`,
+              animationDelay: `${f.dl}s`,
+            }}
+          />
+        ))}
+
+        {/* Césped realista */}
+        <div className="intro-grass-wrap">
+          <svg className="intro-grass-svg" viewBox="0 0 400 50" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+            {/* Capa trasera - pasto oscuro */}
+            {Array.from({length: 160}, (_, i) => {
+              const x = i * 2.5;
+              const heights = [3,38,18,5,42,12,35,2,22,40,6,14,30,8,44,16,33,4,20,36,10,28,7,45,15];
+              const top = heights[i % heights.length];
+              const darkGreens = ['#1a5a2a','#165224','#1d6830','#18562a','#1b5e2c','#16522a','#1e6c32','#175828','#1a602e','#155026'];
+              const fill = darkGreens[i % darkGreens.length];
+              const mid = (50 + top) / 2;
+              return <path key={`bg${i}`} d={`M${x},50 Q${x+0.5},${mid} ${x+0.8},${top} Q${x+1.1},${mid} ${x+1.6},50`} fill={fill} />;
+            })}
+            {/* Capa frontal - pasto claro */}
+            {Array.from({length: 160}, (_, i) => {
+              const x = i * 2.5 + 1.2;
+              const heights = [5,32,15,42,8,25,3,36,20,44,10,28,6,40,13,34,2,24,38,7,30,18,46,11,22];
+              const top = heights[i % heights.length];
+              const lightGreens = ['#22882e','#2a9436','#248c32','#2c9838','#269034','#209030','#289436','#2a9234','#248e32','#2c9638'];
+              const fill = lightGreens[i % lightGreens.length];
+              const mid = (50 + top) / 2;
+              const opacity = i % 2 === 0 ? 0.8 : 0.7;
+              return <path key={`fg${i}`} d={`M${x},50 Q${x+0.5},${mid} ${x+0.8},${top} Q${x+1.1},${mid} ${x+1.6},50`} fill={fill} opacity={opacity} />;
+            })}
+          </svg>
+          <div className="intro-grass-ground" />
         </div>
       </div>
     </>
