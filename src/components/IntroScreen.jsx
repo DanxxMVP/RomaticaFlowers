@@ -638,7 +638,7 @@ export default function IntroScreen({ onStart }) {
 
         <div className="intro-content">
           <h1>Te tengo un detalle preciosa</h1>
-          <p>Hecho con todo mi corazón, espero te guste</p>
+          <p>Hecho con todo mi corazón, espero te guste (Usa Audifonos o bajale el volumen)</p>
           <div className="intro-hearts-row">♥ ♥ ♥ ♥ ♥</div>
           <button className="intro-btn" onClick={handleClick}>
             Ver

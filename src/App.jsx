@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import IntroScreen from "./components/IntroScreen";
+import ExitModal from "./components/ExitModal";
+import HeartExitButton from "./components/HeartExitButton";
 
 export default function App() {
   const [started, setStarted] = useState(false);
@@ -9,6 +11,10 @@ export default function App() {
   const bgAudioRef = useRef(null);
   const rocketRef = useRef(null);
   const [isMobile, setIsMobile] = useState(() => typeof window !== "undefined" && window.innerWidth <= 700);
+  const [showExitModal, setShowExitModal] = useState(false);
+  const [exitCountdown, setExitCountdown] = useState(null);
+  const [exitReady, setExitReady] = useState(false);
+  const firstLoopDone = useRef(false);
 
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth <= 700);
@@ -16,12 +22,68 @@ export default function App() {
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
+  useEffect(() => {
+    if (!started) {
+      setExitCountdown(null);
+      setExitReady(false);
+      firstLoopDone.current = false;
+      return;
+    }
+    const audio = bgAudioRef.current;
+    if (!audio) return;
+
+    const onTimeUpdate = () => {
+      if (firstLoopDone.current) return;
+      const { duration, currentTime } = audio;
+      if (!duration || isNaN(duration)) return;
+      const remaining = Math.ceil(duration - currentTime);
+      if (remaining <= 30) {
+        setExitCountdown(remaining <= 0 ? 0 : remaining);
+      }
+    };
+
+    const onLoop = () => {
+      if (!firstLoopDone.current) {
+        firstLoopDone.current = true;
+        setExitCountdown(0);
+        setExitReady(true);
+        audio.removeEventListener("timeupdate", onTimeUpdate);
+      }
+    };
+
+    // 'seeking' fires when looping back to 0
+    audio.addEventListener("timeupdate", onTimeUpdate);
+    audio.addEventListener("seeking", onLoop);
+    return () => {
+      audio.removeEventListener("timeupdate", onTimeUpdate);
+      audio.removeEventListener("seeking", onLoop);
+    };
+  }, [started]);
+
   const handleStart = () => {
     if (bgAudioRef.current) {
       bgAudioRef.current.volume = 0.4;
       bgAudioRef.current.play().catch(() => {});
     }
     setStarted(true);
+    setShowExitModal(false);
+  };
+
+  const handleExit = () => {
+    if (bgAudioRef.current) bgAudioRef.current.pause();
+    if (audioRef.current) audioRef.current.pause();
+    window.close();
+    // fallback if window.close() is blocked by browser
+    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#f7dce8;font-family:Georgia,serif;font-size:1.4rem;background:#0a0a1a">💖 Hasta pronto 💖</div>';
+  };
+
+  const handleReplay = () => {
+    if (bgAudioRef.current) { bgAudioRef.current.pause(); bgAudioRef.current.currentTime = 0; }
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current.currentTime = 0; }
+    setActiveSong(null);
+    setActiveMessage(null);
+    setShowExitModal(false);
+    setStarted(false);
   };
 
   useEffect(() => {
@@ -345,6 +407,34 @@ export default function App() {
           pointer-events: none;
           opacity: 0;
           animation: hintAppear 7s ease-in-out 1.5s both;
+        }
+
+        .rocketHint .exit-area {
+          pointer-events: auto;
+          margin-top: 14px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .exit-countdown {
+          font-family: Georgia, serif;
+          font-size: 0.8rem;
+          color: rgba(240, 200, 216, 0.7);
+          text-align: center;
+          margin-top: 8px;
+          animation: countdownPulse 1s ease-in-out infinite;
+        }
+
+        .exit-countdown span {
+          font-size: 1.1rem;
+          font-weight: bold;
+          color: #e8a0c0;
+        }
+
+        @keyframes countdownPulse {
+          0%, 100% { opacity: 0.7; }
+          50% { opacity: 1; }
         }
 
         .rocketHint .hintHeart {
@@ -952,6 +1042,16 @@ export default function App() {
           <div className="rocketHint">
             <span className="hintHeart">{"\u2764"}</span>
             <span className="hintText">Haz clic en los pétalos chula</span>
+            <div className="exit-area">
+              {exitCountdown !== null && exitCountdown > 0 && !exitReady && (
+                <div className="exit-countdown">
+                  <span>{exitCountdown}s</span>
+                </div>
+              )}
+              {(exitCountdown === 0 || exitReady) && (
+                <HeartExitButton onClick={() => setShowExitModal(true)} />
+              )}
+            </div>
           </div>
 
           {stars.map((star) => (
@@ -1137,6 +1237,10 @@ export default function App() {
                 <button className="songClose" onClick={closeMessage}>Cerrar</button>
               </div>
             </div>
+          )}
+
+          {showExitModal && (
+            <ExitModal onExit={handleExit} onReplay={handleReplay} />
           )}
         </div>
       )}
