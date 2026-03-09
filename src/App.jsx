@@ -1,67 +1,81 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import IntroScreen from "./components/IntroScreen";
 
 export default function App() {
   const [started, setStarted] = useState(false);
+  const [activeSong, setActiveSong] = useState(null);
+  const audioRef = useRef(null);
+
+  useEffect(() => {
+    if (activeSong && activeSong.audioUrl) {
+      audioRef.current?.play();
+    }
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+    };
+  }, [activeSong]);
+
+  const closeSong = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    setActiveSong(null);
+  };
+
+  const petalSongs = [
+    { petal: "tLeft", title: "Soy Todo Tuyo", artist: "Los Tucanes de Tijuana", lyric: "Me encantas cuando sonríes\nte ves de lo más hermosa\nestoy tan enamorado\nque hasta enojado te veo preciosa", audioUrl: "/Songs/soy-todo-tuyo-clip.mp3" },
+    { petal: "tRight", title: "Ya Borracho", artist: "", lyric: "Pa enamorarte, las flores no son tan caras\nPero llevan todo el cariño de mi alma\nQue pa en febrero vendré frente a ti\nCon mis preguntas y digas que sí", audioUrl: "/Songs/ya-borracho-clip.mp3" },
+    { petal: "tCenter", title: "Vamos Tarde", artist: "Pepe Aguilar", lyric: "Si te hubiera conocido hace tiempo\nSi te hubiera conocido de hace tiempo\nCuántas noches, tantas citas con tu cuerpo\nImagina todo lo que nos debemos\n\nAquí estoy haciendo cuentas\nY tendría que darte un millón de besos\nPa' ponernos al parejo\nDame luz verde y empiezo", audioUrl: "/Songs/vamos-tarde-clip.mp3" },
+  ];
 
   const bouquetFlowers = [
-    { id: 1, left: "50%", height: 285, scale: 1.15, delay: 0.2, sway: 5.6 },
-    { id: 2, left: "43%", height: 250, scale: 1.02, delay: 0.45, sway: 6.1 },
-    { id: 3, left: "57%", height: 248, scale: 1.02, delay: 0.55, sway: 6.2 },
-    { id: 4, left: "36%", height: 220, scale: 0.95, delay: 0.75, sway: 6.6 },
-    { id: 5, left: "64%", height: 218, scale: 0.95, delay: 0.85, sway: 6.8 },
-    { id: 6, left: "30%", height: 188, scale: 0.88, delay: 1.05, sway: 7.2 },
-    { id: 7, left: "70%", height: 186, scale: 0.88, delay: 1.15, sway: 7.4 },
+    { id: 1, left: "50%", height: 200, scale: 1.20, delay: 0.2, sway: 5.6, type: "tulip" },
+    { id: 2, left: "42%", height: 160, scale: 1.04, delay: 0.4, sway: 6.1 },
+    { id: 3, left: "58%", height: 158, scale: 1.04, delay: 0.5, sway: 6.2 },
+    { id: 4, left: "46%", height: 150, scale: 1.0, delay: 0.6, sway: 6.3 },
+    { id: 5, left: "54%", height: 148, scale: 1.0, delay: 0.65, sway: 6.4 },
+    { id: 6, left: "34%", height: 140, scale: 0.96, delay: 0.75, sway: 6.6 },
+    { id: 7, left: "66%", height: 138, scale: 0.96, delay: 0.8, sway: 6.7 },
+    { id: 8, left: "26%", height: 128, scale: 0.90, delay: 0.95, sway: 7.0 },
+    { id: 9, left: "74%", height: 126, scale: 0.90, delay: 1.05, sway: 7.1 },
+    { id: 10, left: "18%", height: 115, scale: 0.84, delay: 1.15, sway: 7.3 },
+    { id: 11, left: "82%", height: 113, scale: 0.84, delay: 1.25, sway: 7.5 },
+    { id: 12, left: "10%", height: 102, scale: 0.78, delay: 1.35, sway: 7.7 },
+    { id: 13, left: "90%", height: 100, scale: 0.78, delay: 1.45, sway: 7.9 },
   ];
 
-  const hearts = [
-    { id: 1, left: "39%", bottom: 245, size: 16, delay: 2.6, duration: 4.8 },
-    { id: 2, left: "47%", bottom: 330, size: 20, delay: 3.3, duration: 5.2 },
-    { id: 3, left: "55%", bottom: 280, size: 18, delay: 4.0, duration: 4.9 },
-    { id: 4, left: "61%", bottom: 350, size: 15, delay: 4.8, duration: 5.4 },
-    { id: 5, left: "44%", bottom: 390, size: 13, delay: 5.2, duration: 5.1 },
-    { id: 6, left: "33%", bottom: 310, size: 14, delay: 3.0, duration: 5.6 },
-    { id: 7, left: "52%", bottom: 260, size: 22, delay: 3.8, duration: 4.6 },
-    { id: 8, left: "67%", bottom: 300, size: 12, delay: 4.4, duration: 5.8 },
-    { id: 9, left: "36%", bottom: 370, size: 17, delay: 5.6, duration: 4.5 },
-    { id: 10, left: "58%", bottom: 340, size: 19, delay: 2.9, duration: 5.3 },
-    { id: 11, left: "42%", bottom: 285, size: 15, delay: 6.0, duration: 4.7 },
-    { id: 12, left: "50%", bottom: 400, size: 21, delay: 3.5, duration: 5.0 },
-    { id: 13, left: "28%", bottom: 270, size: 11, delay: 4.2, duration: 5.9 },
-    { id: 14, left: "70%", bottom: 320, size: 16, delay: 5.0, duration: 4.4 },
-    { id: 15, left: "45%", bottom: 360, size: 18, delay: 6.4, duration: 5.2 },
-  ];
+  const hearts = bouquetFlowers.flatMap((flower, fi) =>
+    [0, 1, 2].map((j) => ({
+      id: fi * 3 + j,
+      left: flower.left,
+      bottom: flower.height - 10,
+      size: 12 + (j % 3) * 4,
+      delay: 2.5 + flower.delay + j * 1.8,
+      duration: 4.2 + (j % 3) * 0.6,
+    }))
+  );
 
-  const introHearts = Array.from({ length: 30 }, (_, i) => ({
+
+
+  const stars = Array.from({ length: 80 }, (_, i) => ({
     id: i,
-    left: `${5 + ((i * 13) % 90)}%`,
-    size: 10 + (i % 5) * 6,
-    delay: (i % 8) * 0.6,
-    duration: 3.5 + (i % 4) * 0.8,
-    opacity: 0.3 + (i % 4) * 0.15,
+    left: `${(Math.sin(i * 3.7) * 48 + 50).toFixed(1)}%`,
+    top: `${(Math.cos(i * 2.3) * 33 + 35 + Math.sin(i * 5.1) * 8).toFixed(1)}%`,
+    size: 1 + (i % 4),
+    delay: `${((i * 0.37) % 3.5).toFixed(2)}s`,
+    duration: `${2.2 + (i % 5) * 0.5}s`,
   }));
 
-  const stars = Array.from({ length: 34 }, (_, i) => ({
-    id: i,
-    left: `${3 + ((i * 17) % 94)}%`,
-    top: `${2 + ((i * 11) % 58)}%`,
-    size: 1 + (i % 3),
-    delay: `${(i % 7) * 0.45}s`,
-    duration: `${2.6 + (i % 4)}s`,
-  }));
 
-  const bubbles = Array.from({ length: 10 }, (_, i) => ({
-    id: i,
-    left: `${12 + i * 8}%`,
-    top: `${38 + ((i * 9) % 30)}%`,
-    size: 10 + (i % 3) * 8,
-    delay: `${i * 0.5}s`,
-    duration: `${3.2 + (i % 3)}s`,
-  }));
 
   return (
     <>
       <style>{`
-        * {
+        {
           box-sizing: border-box;
         }
 
@@ -77,88 +91,7 @@ export default function App() {
           background: #070b23;
         }
 
-        /* ========== INTRO SCREEN ========== */
-        .intro {
-          position: fixed;
-          inset: 0;
-          z-index: 100;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          background:
-            radial-gradient(circle at 50% 40%, rgba(180, 80, 140, 0.12), transparent 50%),
-            linear-gradient(to bottom, #05081d 0%, #10082a 40%, #0d0620 100%);
-          overflow: hidden;
-        }
 
-        .intro-heart {
-          position: absolute;
-          color: #e8659f;
-          animation: introFloat ease-in-out infinite;
-          pointer-events: none;
-        }
-
-        .intro-content {
-          position: relative;
-          z-index: 2;
-          text-align: center;
-          animation: introFadeIn 1.2s ease both;
-        }
-
-        .intro-content h1 {
-          margin: 0;
-          font-size: clamp(1.8rem, 4vw, 2.8rem);
-          color: #f7dce8;
-          font-weight: 700;
-          text-shadow: 0 0 30px rgba(230, 140, 180, 0.3);
-        }
-
-        .intro-content p {
-          margin: 16px 0 0;
-          font-size: clamp(0.9rem, 2vw, 1.15rem);
-          color: #d4a8c0;
-          font-style: italic;
-        }
-
-        .intro-btn {
-          margin-top: 32px;
-          padding: 14px 48px;
-          font-family: Georgia, serif;
-          font-size: 1.15rem;
-          color: #fff;
-          background: linear-gradient(135deg, #d4609a, #b8407a);
-          border: 1px solid rgba(255, 180, 210, 0.3);
-          border-radius: 999px;
-          cursor: pointer;
-          box-shadow: 0 0 30px rgba(210, 100, 160, 0.3), 0 4px 16px rgba(0,0,0,0.3);
-          transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .intro-btn:hover {
-          transform: scale(1.06);
-          box-shadow: 0 0 44px rgba(210, 100, 160, 0.5), 0 6px 20px rgba(0,0,0,0.3);
-        }
-
-        .intro-hearts-row {
-          margin-top: 22px;
-          font-size: 18px;
-          letter-spacing: 8px;
-          color: #d88aaf;
-          opacity: 0.7;
-        }
-
-        @keyframes introFloat {
-          0% { transform: translateY(100vh) scale(0.6); opacity: 0; }
-          15% { opacity: 1; }
-          85% { opacity: 1; }
-          100% { transform: translateY(-20vh) scale(1.1); opacity: 0; }
-        }
-
-        @keyframes introFadeIn {
-          0% { opacity: 0; transform: translateY(24px); }
-          100% { opacity: 1; transform: translateY(0); }
-        }
 
         /* ========== MAIN SCENE ========== */
         .scene {
@@ -259,30 +192,11 @@ export default function App() {
           animation: twinkle ease-in-out infinite;
         }
 
-        .bubble {
-          position: absolute;
-          border-radius: 50%;
-          border: 1px solid rgba(255, 182, 213, 0.2);
-          background: rgba(255,255,255,0.03);
-          box-shadow: 0 0 16px rgba(255, 170, 210, 0.06);
-          animation: pulseBubble ease-in-out infinite;
-        }
 
-        .groundGlow {
-          position: absolute;
-          bottom: -20px;
-          left: 50%;
-          transform: translateX(-50%);
-          width: min(900px, 92vw);
-          height: 200px;
-          background: radial-gradient(ellipse at center, rgba(67, 255, 142, 0.12), rgba(67,255,142,0.03) 45%, transparent 70%);
-          filter: blur(10px);
-          pointer-events: none;
-        }
 
         .message {
           position: absolute;
-          top: 86px;
+          top: 18%;
           left: 50%;
           transform: translateX(-50%);
           width: min(360px, calc(100vw - 32px));
@@ -325,156 +239,18 @@ export default function App() {
         /* ========== BOUQUET ========== */
         .bouquetWrap {
           position: absolute;
-          left: 50%;
+          left: 0;
           bottom: 0;
-          transform: translateX(-50%);
-          width: min(860px, 100vw);
+          width: 100%;
           height: min(720px, 82vh);
         }
 
-        .bouquetBase {
-          position: absolute;
-          left: 50%;
-          bottom: 44px;
-          transform: translateX(-50%);
-          width: 180px;
-          height: 60px;
-          border-radius: 50%;
-          background: radial-gradient(ellipse at center, rgba(0,0,0,0.28), rgba(0,0,0,0.04) 70%, transparent 75%);
-          filter: blur(8px);
-        }
 
-        /* Main wrap paper — kraft style */
-        .paperWrap {
-          position: absolute;
-          left: 50%;
-          bottom: 14px;
-          transform: translateX(-50%);
-          width: 310px;
-          height: 230px;
-          background: linear-gradient(175deg, rgba(200, 160, 130, 0.14), rgba(180, 130, 100, 0.10) 50%, rgba(160, 110, 90, 0.12));
-          border: 1px solid rgba(220, 180, 150, 0.12);
-          backdrop-filter: blur(3px);
-          clip-path: polygon(8% 0%, 92% 0%, 100% 100%, 0% 100%);
-          opacity: 0.85;
-        }
-
-        /* Inner tissue paper */
-        .paperInner {
-          position: absolute;
-          left: 50%;
-          bottom: 40px;
-          transform: translateX(-50%);
-          width: 270px;
-          height: 190px;
-          background: linear-gradient(to bottom, rgba(255,240,245,0.08), rgba(255,220,235,0.10));
-          border: 1px solid rgba(255, 230, 242, 0.06);
-          clip-path: polygon(5% 0%, 95% 0%, 100% 100%, 0% 100%);
-          opacity: 0.6;
-        }
-
-        /* Paper fold lines */
-        .paperFold {
-          position: absolute;
-          left: 50%;
-          bottom: 14px;
-          transform: translateX(-50%);
-          width: 310px;
-          height: 230px;
-          clip-path: polygon(8% 0%, 92% 0%, 100% 100%, 0% 100%);
-          overflow: hidden;
-          pointer-events: none;
-        }
-
-        .paperFold::before,
-        .paperFold::after {
-          content: "";
-          position: absolute;
-          top: 0;
-          bottom: 0;
-          width: 1px;
-          background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.04), transparent);
-        }
-
-        .paperFold::before { left: 35%; }
-        .paperFold::after { left: 65%; }
-
-        .ribbonCenter {
-          position: absolute;
-          left: 50%;
-          bottom: 62px;
-          transform: translateX(-50%);
-          width: 100px;
-          height: 22px;
-          border-radius: 999px;
-          background: linear-gradient(to right, #db7ca5, #c85d8e, #db7ca5);
-          box-shadow: 0 0 16px rgba(214, 122, 171, 0.25);
-          z-index: 3;
-        }
-
-        /* Ribbon bow knot */
-        .ribbonKnot {
-          position: absolute;
-          left: 50%;
-          bottom: 66px;
-          transform: translateX(-50%);
-          width: 14px;
-          height: 14px;
-          border-radius: 50%;
-          background: radial-gradient(circle, #e090b8, #c06090);
-          box-shadow: 0 0 8px rgba(200, 100, 150, 0.3);
-          z-index: 4;
-        }
-
-        .ribbonLeft,
-        .ribbonRight {
-          position: absolute;
-          bottom: 28px;
-          width: 40px;
-          height: 65px;
-          background: linear-gradient(to bottom, #d672a0, #a84c75);
-          opacity: 0.92;
-          z-index: 2;
-        }
-
-        .ribbonLeft {
-          left: calc(50% - 14px);
-          clip-path: polygon(100% 0%, 0% 18%, 28% 100%, 100% 70%);
-          transform: translateX(-100%);
-        }
-
-        .ribbonRight {
-          left: calc(50% + 14px);
-          clip-path: polygon(0% 0%, 100% 18%, 72% 100%, 0% 70%);
-        }
-
-        /* Ribbon loop bows */
-        .ribbonLoopLeft,
-        .ribbonLoopRight {
-          position: absolute;
-          bottom: 68px;
-          width: 32px;
-          height: 20px;
-          border-radius: 50%;
-          background: linear-gradient(to bottom, #e48ab5, #c86898);
-          opacity: 0.85;
-          z-index: 3;
-        }
-
-        .ribbonLoopLeft {
-          left: calc(50% - 38px);
-          transform: rotate(-15deg);
-        }
-
-        .ribbonLoopRight {
-          left: calc(50% + 6px);
-          transform: rotate(15deg);
-        }
 
         .flowerItem {
           position: absolute;
           left: 50%;
-          bottom: 74px;
+          bottom: 0;
           transform-origin: bottom center;
         }
 
@@ -500,8 +276,8 @@ export default function App() {
 
         .leaf {
           position: absolute;
-          width: 28px;
-          height: 76px;
+          width: 12px;
+          height: 32px;
           background: linear-gradient(to bottom, #29c264, #166534);
           border-radius: 100% 0 100% 0;
           opacity: 0.9;
@@ -511,23 +287,14 @@ export default function App() {
 
         .leaf.left1 {
           left: 50%;
-          bottom: 62px;
-          transform: translateX(-92%) rotate(-42deg);
+          bottom: 36px;
+          transform: translateX(-55%) rotate(-18deg);
         }
 
         .leaf.right1 {
           left: 50%;
-          bottom: 108px;
-          transform: translateX(-6%) rotate(40deg) scaleX(-1);
-        }
-
-        .leaf.left2 {
-          left: 50%;
-          bottom: 150px;
-          width: 22px;
-          height: 54px;
-          transform: translateX(-90%) rotate(-28deg);
-          opacity: 0.7;
+          bottom: 65px;
+          transform: translateX(-42%) rotate(16deg) scaleX(-1);
         }
 
         .bloom {
@@ -613,6 +380,110 @@ export default function App() {
           animation: pollenIn 0.5s ease-out both;
         }
 
+        /* ========== TULIP ========== */
+        .tulipBud {
+          position: absolute;
+          left: 50%;
+          bottom: 0;
+          width: 22px;
+          height: 48px;
+          transform: translateX(-50%);
+          border-radius: 48% 48% 38% 38%;
+          background: linear-gradient(to bottom, #e83a6e, #d42d5e 40%, #b52550);
+          box-shadow: 0 0 18px rgba(230, 60, 110, 0.3);
+          animation: budAppear 0.8s ease-out both;
+          z-index: 2;
+        }
+
+        .tulipPetal {
+          position: absolute;
+          bottom: 4px;
+          width: 26px;
+          height: 56px;
+          background: linear-gradient(to top, #f04878 0%, #e83a6e 40%, #ff6b96 100%);
+          border: 1px solid rgba(255,255,255,0.1);
+          box-shadow: 0 0 16px rgba(240, 72, 120, 0.2);
+          z-index: 1;
+        }
+
+        .tulipPetal.tLeft {
+          left: 50%;
+          border-radius: 80% 100% 10% 80%;
+          transform-origin: bottom right;
+        }
+
+        .tulipPetal.tRight {
+          left: 50%;
+          border-radius: 100% 80% 80% 10%;
+          transform-origin: bottom left;
+        }
+
+        .tulipPetal.tCenter {
+          left: 50%;
+          width: 22px;
+          height: 60px;
+          border-radius: 50% 50% 30% 30%;
+          transform-origin: bottom center;
+          z-index: 3;
+        }
+
+        .tulipPetal.tBackLeft {
+          left: 50%;
+          width: 22px;
+          height: 50px;
+          opacity: 0.7;
+          border-radius: 80% 100% 10% 80%;
+          transform-origin: bottom right;
+        }
+
+        .tulipPetal.tBackRight {
+          left: 50%;
+          width: 22px;
+          height: 50px;
+          opacity: 0.7;
+          border-radius: 100% 80% 80% 10%;
+          transform-origin: bottom left;
+        }
+
+        .tulipPollen {
+          position: absolute;
+          left: 50%;
+          bottom: 18px;
+          width: 8px;
+          height: 8px;
+          transform: translateX(-50%);
+          border-radius: 50%;
+          background: radial-gradient(circle, #ffe066, #f5c518);
+          box-shadow: 0 0 12px rgba(255, 220, 60, 0.5);
+          animation: pollenIn 0.5s ease-out both;
+          z-index: 4;
+        }
+
+        @keyframes tulipOpenLeft {
+          0% { transform: translateX(-100%) rotate(0deg) scaleY(0.25); opacity: 0.3; }
+          100% { transform: translateX(-100%) rotate(-38deg) scaleY(1); opacity: 1; }
+        }
+
+        @keyframes tulipOpenRight {
+          0% { transform: translateX(0%) rotate(0deg) scaleY(0.25); opacity: 0.3; }
+          100% { transform: translateX(0%) rotate(38deg) scaleY(1); opacity: 1; }
+        }
+
+        @keyframes tulipOpenCenter {
+          0% { transform: translateX(-50%) rotate(0deg) scaleY(0.25); opacity: 0.3; }
+          100% { transform: translateX(-50%) rotate(-1deg) scaleY(1); opacity: 1; }
+        }
+
+        @keyframes tulipOpenBackLeft {
+          0% { transform: translateX(-100%) rotate(-6deg) scaleY(0.2); opacity: 0; }
+          100% { transform: translateX(-100%) rotate(-58deg) scaleY(1); opacity: 0.7; }
+        }
+
+        @keyframes tulipOpenBackRight {
+          0% { transform: translateX(0%) rotate(6deg) scaleY(0.2); opacity: 0; }
+          100% { transform: translateX(0%) rotate(58deg) scaleY(1); opacity: 0.7; }
+        }
+
         .heart {
           position: absolute;
           color: #f2a6c7;
@@ -624,28 +495,14 @@ export default function App() {
           z-index: 4;
         }
 
-        .frontGrass {
-          position: absolute;
-          left: 50%;
-          bottom: 0;
-          transform: translateX(-50%);
-          width: min(1100px, 100vw);
-          height: 130px;
-          background:
-            radial-gradient(ellipse at center, rgba(24, 255, 124, 0.06), transparent 60%),
-            linear-gradient(to top, rgba(2,18,11,0.85), rgba(2,18,11,0));
-          pointer-events: none;
-        }
+
 
         @keyframes twinkle {
           0%, 100% { opacity: 0.25; transform: scale(0.8); }
           50% { opacity: 0.95; transform: scale(1.2); }
         }
 
-        @keyframes pulseBubble {
-          0%, 100% { opacity: 0.1; transform: scale(0.82); }
-          50% { opacity: 0.45; transform: scale(1.08); }
-        }
+
 
         @keyframes growStem {
           0% { transform: translateX(-50%) scaleY(0); opacity: 0.2; }
@@ -722,6 +579,88 @@ export default function App() {
           }
         }
 
+        /* ========== SONG OVERLAY ========== */
+        .songOverlay {
+          position: fixed;
+          inset: 0;
+          z-index: 200;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(5, 5, 20, 0.75);
+          backdrop-filter: blur(6px);
+          animation: songFadeIn 0.4s ease both;
+        }
+
+        .songCard {
+          position: relative;
+          width: min(380px, calc(100vw - 40px));
+          padding: 32px 28px 28px;
+          border-radius: 24px;
+          background: linear-gradient(145deg, rgba(30, 15, 40, 0.92), rgba(20, 10, 30, 0.95));
+          border: 1px solid rgba(255, 180, 220, 0.18);
+          box-shadow: 0 0 60px rgba(200, 100, 160, 0.2), 0 8px 32px rgba(0,0,0,0.4);
+          text-align: center;
+          animation: songCardIn 0.5s ease 0.1s both;
+        }
+
+        .songCard .songNote {
+          font-size: 28px;
+          margin-bottom: 12px;
+        }
+
+        .songCard .songTitle {
+          margin: 0;
+          font-size: 1.3rem;
+          color: #f7dce8;
+          font-weight: 700;
+        }
+
+        .songCard .songArtist {
+          margin: 6px 0 0;
+          font-size: 0.9rem;
+          color: #d4a8c0;
+        }
+
+        .songCard .songLyric {
+          margin: 18px 0 0;
+          font-size: 1.05rem;
+          line-height: 1.5;
+          color: #ebcfdc;
+          font-style: italic;
+        }
+
+        .songCard .songClose {
+          margin-top: 22px;
+          padding: 10px 36px;
+          font-family: Georgia, serif;
+          font-size: 1rem;
+          color: #fff;
+          background: linear-gradient(135deg, #d4609a, #b8407a);
+          border: 1px solid rgba(255, 180, 210, 0.3);
+          border-radius: 999px;
+          cursor: pointer;
+          box-shadow: 0 0 20px rgba(210, 100, 160, 0.25);
+          transition: transform 0.2s;
+        }
+
+        .songCard .songClose:hover {
+          transform: scale(1.06);
+        }
+
+        .tulipPetal { cursor: pointer; transition: filter 0.2s; }
+        .tulipPetal:hover { filter: brightness(1.2); }
+
+        @keyframes songFadeIn {
+          0% { opacity: 0; }
+          100% { opacity: 1; }
+        }
+
+        @keyframes songCardIn {
+          0% { opacity: 0; transform: scale(0.85) translateY(20px); }
+          100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
         @media (max-width: 700px) {
           .moonGlow {
             right: 20px;
@@ -745,23 +684,13 @@ export default function App() {
           }
 
           .message {
-            top: 76px;
+            top: 15%;
             width: min(320px, calc(100vw - 24px));
             padding: 18px 18px 16px;
           }
 
           .bouquetWrap {
-            height: 64vh;
-          }
-
-          .paperWrap {
-            width: 230px;
-            height: 175px;
-          }
-
-          .paperInner {
-            width: 200px;
-            height: 140px;
+            height: 60vh;
           }
 
           .rocket-body {
@@ -770,35 +699,7 @@ export default function App() {
         }
       `}</style>
 
-      {/* ========== INTRO SCREEN ========== */}
-      {!started && (
-        <div className="intro">
-          {introHearts.map((h) => (
-            <span
-              key={h.id}
-              className="intro-heart"
-              style={{
-                left: h.left,
-                fontSize: `${h.size}px`,
-                animationDuration: `${h.duration}s`,
-                animationDelay: `${h.delay}s`,
-                opacity: h.opacity,
-              }}
-            >
-              ♥
-            </span>
-          ))}
-
-          <div className="intro-content">
-            <h1>Te tengo un regalo preciosa</h1>
-            <p>Hecho con todo mi corazón</p>
-            <div className="intro-hearts-row">♥ ♥ ♥ ♥ ♥</div>
-            <button className="intro-btn" onClick={() => setStarted(true)}>
-              Ver
-            </button>
-          </div>
-        </div>
-      )}
+      {!started && <IntroScreen onStart={() => setStarted(true)} />}
 
       {/* ========== MAIN SCENE ========== */}
       {started && (
@@ -827,20 +728,7 @@ export default function App() {
             />
           ))}
 
-          {bubbles.map((bubble) => (
-            <span
-              key={bubble.id}
-              className="bubble"
-              style={{
-                left: bubble.left,
-                top: bubble.top,
-                width: `${bubble.size}px`,
-                height: `${bubble.size}px`,
-                animationDelay: bubble.delay,
-                animationDuration: bubble.duration,
-              }}
-            />
-          ))}
+
 
           <div className="message">
             <h1>Para la mujer más bonita</h1>
@@ -848,23 +736,12 @@ export default function App() {
             <div className="miniHearts">♥ ♥ ♥</div>
           </div>
 
-          <div className="groundGlow" />
-
           <div className="bouquetWrap">
-            <div className="bouquetBase" />
-            <div className="paperWrap" />
-            <div className="paperInner" />
-            <div className="paperFold" />
-            <div className="ribbonLoopLeft" />
-            <div className="ribbonLoopRight" />
-            <div className="ribbonKnot" />
-            <div className="ribbonCenter" />
-            <div className="ribbonLeft" />
-            <div className="ribbonRight" />
 
             {bouquetFlowers.map((flower) => {
               const bloomDelay = 1.2 + flower.delay;
               const petalDelay = 1.9 + flower.delay;
+              const isTulip = flower.type === "tulip";
 
               return (
                 <div
@@ -889,51 +766,89 @@ export default function App() {
                       }}
                     />
 
-                    <div
-                      className="leaf left1"
-                      style={{ animationDelay: `${0.45 + flower.delay}s` }}
-                    />
-                    <div
-                      className="leaf right1"
-                      style={{ animationDelay: `${0.7 + flower.delay}s` }}
-                    />
-                    <div
-                      className="leaf left2"
-                      style={{ animationDelay: `${0.95 + flower.delay}s` }}
-                    />
+                    {!isTulip && (
+                      <>
+                        <div
+                          className="leaf left1"
+                          style={{ animationDelay: `${0.45 + flower.delay}s` }}
+                        />
+                        <div
+                          className="leaf right1"
+                          style={{ animationDelay: `${0.7 + flower.delay}s` }}
+                        />
+                      </>
+                    )}
 
                     <div
                       className="bloom"
                       style={{ bottom: `${flower.height - 8}px` }}
                     >
-                      <div
-                        className="budCore"
-                        style={{ animationDelay: `${bloomDelay}s` }}
-                      />
-                      <div
-                        className="petal backLeft"
-                        style={{ animation: `openBackLeft 0.85s ease-out ${petalDelay}s both` }}
-                      />
-                      <div
-                        className="petal backRight"
-                        style={{ animation: `openBackRight 0.85s ease-out ${petalDelay}s both` }}
-                      />
-                      <div
-                        className="petal left"
-                        style={{ animation: `openLeft 0.9s ease-out ${petalDelay + 0.12}s both` }}
-                      />
-                      <div
-                        className="petal right"
-                        style={{ animation: `openRight 0.9s ease-out ${petalDelay + 0.12}s both` }}
-                      />
-                      <div
-                        className="petal center"
-                        style={{ animation: `openCenter 0.82s ease-out ${petalDelay + 0.24}s both` }}
-                      />
-                      <div
-                        className="pollen"
-                        style={{ animationDelay: `${petalDelay + 0.35}s` }}
-                      />
+                      {isTulip ? (
+                        <>
+                          <div
+                            className="tulipBud"
+                            style={{ animationDelay: `${bloomDelay}s` }}
+                          />
+                          <div
+                            className="tulipPetal tBackLeft"
+                            style={{ animation: `tulipOpenBackLeft 1s ease-out ${petalDelay}s both` }}
+                          />
+                          <div
+                            className="tulipPetal tBackRight"
+                            style={{ animation: `tulipOpenBackRight 1s ease-out ${petalDelay}s both` }}
+                          />
+                          <div
+                            className="tulipPetal tLeft"
+                            onClick={() => setActiveSong(petalSongs.find(s => s.petal === "tLeft"))}
+                            style={{ animation: `tulipOpenLeft 1.1s ease-out ${petalDelay + 0.15}s both` }}
+                          />
+                          <div
+                            className="tulipPetal tRight"
+                            onClick={() => setActiveSong(petalSongs.find(s => s.petal === "tRight"))}
+                            style={{ animation: `tulipOpenRight 1.1s ease-out ${petalDelay + 0.15}s both` }}
+                          />
+                          <div
+                            className="tulipPetal tCenter"
+                            onClick={() => setActiveSong(petalSongs.find(s => s.petal === "tCenter"))}
+                            style={{ animation: `tulipOpenCenter 1s ease-out ${petalDelay + 0.3}s both` }}
+                          />
+                          <div
+                            className="tulipPollen"
+                            style={{ animationDelay: `${petalDelay + 0.5}s` }}
+                          />
+                        </>
+                      ) : (
+                        <>
+                          <div
+                            className="budCore"
+                            style={{ animationDelay: `${bloomDelay}s` }}
+                          />
+                          <div
+                            className="petal backLeft"
+                            style={{ animation: `openBackLeft 0.85s ease-out ${petalDelay}s both` }}
+                          />
+                          <div
+                            className="petal backRight"
+                            style={{ animation: `openBackRight 0.85s ease-out ${petalDelay}s both` }}
+                          />
+                          <div
+                            className="petal left"
+                            style={{ animation: `openLeft 0.9s ease-out ${petalDelay + 0.12}s both` }}
+                          />
+                          <div
+                            className="petal right"
+                            style={{ animation: `openRight 0.9s ease-out ${petalDelay + 0.12}s both` }}
+                          />
+                          <div
+                            className="petal center"
+                            style={{ animation: `openCenter 0.82s ease-out ${petalDelay + 0.24}s both` }}
+                          />
+                          <div
+                            className="pollen"
+                            style={{ animationDelay: `${petalDelay + 0.35}s` }}
+                          />
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -957,7 +872,20 @@ export default function App() {
             ))}
           </div>
 
-          <div className="frontGrass" />
+          {activeSong && (
+            <div className="songOverlay" onClick={closeSong}>
+              <div className="songCard" onClick={(e) => e.stopPropagation()}>
+                <div className="songNote">🎵</div>
+                <h2 className="songTitle">{activeSong.title}</h2>
+                <p className="songArtist">{activeSong.artist}</p>
+                <p className="songLyric">"{activeSong.lyric}"</p>
+                {activeSong.audioUrl && (
+                  <audio ref={audioRef} src={activeSong.audioUrl} />
+                )}
+                <button className="songClose" onClick={closeSong}>Cerrar</button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </>
