@@ -4,11 +4,32 @@ import IntroScreen from "./components/IntroScreen";
 export default function App() {
   const [started, setStarted] = useState(false);
   const [activeSong, setActiveSong] = useState(null);
+  const [activeMessage, setActiveMessage] = useState(null);
   const audioRef = useRef(null);
+  const bgAudioRef = useRef(null);
+  const rocketRef = useRef(null);
+  const [isMobile, setIsMobile] = useState(() => typeof window !== "undefined" && window.innerWidth <= 700);
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth <= 700);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  const handleStart = () => {
+    if (bgAudioRef.current) {
+      bgAudioRef.current.volume = 0.4;
+      bgAudioRef.current.play().catch(() => {});
+    }
+    setStarted(true);
+  };
 
   useEffect(() => {
     if (activeSong && activeSong.audioUrl) {
+      if (bgAudioRef.current) bgAudioRef.current.pause();
       audioRef.current?.play();
+    } else {
+      if (bgAudioRef.current) bgAudioRef.current.play().catch(() => {});
     }
     return () => {
       if (audioRef.current) {
@@ -18,6 +39,41 @@ export default function App() {
     };
   }, [activeSong]);
 
+  useEffect(() => {
+    if (!started) return;
+    let rafId;
+    const vbW = isMobile ? 1000 : 1000;
+    const vbH = isMobile ? 1000 : 700;
+    const timer = setTimeout(() => {
+      const pathEl = document.getElementById("rocketFlightPath");
+      const el = rocketRef.current;
+      if (!pathEl || !el) return;
+      const totalLen = pathEl.getTotalLength();
+      const dur = 7000;
+      let s = null;
+      const step = (ts) => {
+        if (!s) s = ts;
+        const raw = Math.min((ts - s) / dur, 1);
+        const t = raw < 0.5 ? 4*raw*raw*raw : 1 - Math.pow(-2*raw+2, 3)/2;
+        const pt = pathEl.getPointAtLength(t * totalLen);
+        const d = 1;
+        const p1 = pathEl.getPointAtLength(Math.max(0, t*totalLen - d));
+        const p2 = pathEl.getPointAtLength(Math.min(totalLen, t*totalLen + d));
+        const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180 / Math.PI;
+        let op = 1;
+        if (raw < 0.08) op = raw / 0.08;
+        else if (raw > 0.88) op = Math.max(0, (1 - raw) / 0.12);
+        el.style.left = `${(pt.x / vbW) * 100}%`;
+        el.style.top = `${(pt.y / vbH) * 100}%`;
+        el.style.transform = `translate(-50%,-50%) rotate(${angle + 90}deg)`;
+        el.style.opacity = String(op);
+        if (raw < 1) rafId = requestAnimationFrame(step);
+      };
+      rafId = requestAnimationFrame(step);
+    }, 1500);
+    return () => { clearTimeout(timer); cancelAnimationFrame(rafId); };
+  }, [started, isMobile]);
+
   const closeSong = () => {
     if (audioRef.current) {
       audioRef.current.pause();
@@ -26,10 +82,27 @@ export default function App() {
     setActiveSong(null);
   };
 
+  const closeMessage = () => setActiveMessage(null);
+
   const petalSongs = [
     { petal: "tLeft", title: "Soy Todo Tuyo", artist: "Los Tucanes de Tijuana", lyric: "Me encantas cuando sonríes\nte ves de lo más hermosa\nestoy tan enamorado\nque hasta enojado te veo preciosa", audioUrl: "/Songs/soy-todo-tuyo-clip.mp3" },
     { petal: "tRight", title: "Ya Borracho", artist: "", lyric: "Pa enamorarte, las flores no son tan caras\nPero llevan todo el cariño de mi alma\nQue pa en febrero vendré frente a ti\nCon mis preguntas y digas que sí", audioUrl: "/Songs/ya-borracho-clip.mp3" },
     { petal: "tCenter", title: "Vamos Tarde", artist: "Pepe Aguilar", lyric: "Si te hubiera conocido hace tiempo\nSi te hubiera conocido de hace tiempo\nCuántas noches, tantas citas con tu cuerpo\nImagina todo lo que nos debemos\n\nAquí estoy haciendo cuentas\nY tendría que darte un millón de besos\nPa' ponernos al parejo\nDame luz verde y empiezo", audioUrl: "/Songs/vamos-tarde-clip.mp3" },
+  ];
+
+  const flowerMessages = [
+    { id: 2, phrase: "La belleza de una mujer no está en su rostro, está en su corazón." },
+    { id: 3, phrase: "Eres la prueba de que Dios tiene favoritas." },
+    { id: 4, phrase: "Tu sonrisa ilumina hasta la noche más oscura." },
+    { id: 5, phrase: "No necesitas alas para ser un ángel." },
+    { id: 6, phrase: "La mujer más bonita es la que sonríe con el alma." },
+    { id: 7, phrase: "Tus ojos tienen más estrellas que el cielo." },
+    { id: 8, phrase: "Eres poesía hecha mujer." },
+    { id: 9, phrase: "Cada vez que sonríes, el mundo se detiene." },
+    { id: 10, phrase: "Dios se tomó su tiempo cuando te creó." },
+    { id: 11, phrase: "Bonita por fuera, hermosa por dentro." },
+    { id: 12, phrase: "Eres ese tipo de magia que no se puede explicar." },
+    { id: 13, phrase: "Si la belleza fuera tiempo, tú serías la eternidad." },
   ];
 
   const bouquetFlowers = [
@@ -70,7 +143,9 @@ export default function App() {
     duration: `${2.2 + (i % 5) * 0.5}s`,
   }));
 
-
+  const rocketCurve = isMobile
+    ? "M 120 900 C 200 700, 350 400, 750 80"
+    : "M 70 620 C 260 520, 520 320, 900 100";
 
   return (
     <>
@@ -145,44 +220,160 @@ export default function App() {
           50% { opacity: 1; transform: scale(1.04); }
         }
 
-        /* ========== ROCKET ========== */
-        .rocket {
+        /* ========== ROCKET (offset-path) ========== */
+        .flight-svg {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          pointer-events: none;
+          z-index: 4;
+        }
+
+        .rocket-wrap {
           position: absolute;
           z-index: 10;
-          animation: rocketFly 4.5s ease-in-out 1.5s both;
           pointer-events: none;
+          opacity: 0;
         }
 
         .rocket-body {
           position: relative;
-          font-size: 32px;
-          filter: drop-shadow(0 0 12px rgba(255, 180, 100, 0.5));
-          transform: rotate(-45deg);
+          width: 30px;
+          height: 70px;
+          filter: drop-shadow(0 0 14px rgba(255, 180, 100, 0.5));
         }
 
+        /* Nose cone */
+        .rocket-nose {
+          position: absolute;
+          top: 0;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 0;
+          height: 0;
+          border-left: 12px solid transparent;
+          border-right: 12px solid transparent;
+          border-bottom: 24px solid #e8e8f0;
+        }
+
+        /* Fuselage */
+        .rocket-fuselage {
+          position: absolute;
+          top: 22px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 24px;
+          height: 38px;
+          border-radius: 3px 3px 4px 4px;
+          background: linear-gradient(135deg, #f0f0f8 0%, #c8c8d8 50%, #a8a8c0 100%);
+          box-shadow: inset 2px 0 4px rgba(255,255,255,0.3), inset -2px 0 4px rgba(0,0,0,0.1);
+        }
+
+        /* Window */
+        .rocket-window {
+          position: absolute;
+          top: 30px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          background: radial-gradient(circle, #6ec6ff, #3a8fd4);
+          border: 1px solid rgba(255,255,255,0.4);
+          z-index: 2;
+        }
+
+        /* Fins */
+        .rocket-fin-l, .rocket-fin-r {
+          position: absolute;
+          bottom: 8px;
+          width: 0;
+          height: 0;
+        }
+        .rocket-fin-l {
+          left: -5px;
+          border-top: 10px solid transparent;
+          border-right: 10px solid #d44040;
+          border-bottom: 8px solid #d44040;
+        }
+        .rocket-fin-r {
+          right: -5px;
+          border-top: 10px solid transparent;
+          border-left: 10px solid #d44040;
+          border-bottom: 8px solid #d44040;
+        }
+
+        /* Flame trail */
         .rocket-trail {
           position: absolute;
-          bottom: -6px;
+          bottom: -22px;
           left: 50%;
-          transform: translateX(-50%) rotate(-45deg);
-          width: 6px;
-          height: 40px;
-          background: linear-gradient(to bottom, rgba(255, 160, 60, 0.8), rgba(255, 100, 50, 0.4), transparent);
+          transform: translateX(-50%);
+          width: 12px;
+          height: 28px;
+          background: linear-gradient(to bottom, #ffaa30, #ff6020 50%, rgba(255,60,20,0.3), transparent);
           border-radius: 0 0 50% 50%;
-          filter: blur(3px);
-          animation: trailFlicker 0.15s ease-in-out infinite alternate;
+          filter: blur(2px);
+          animation: trailFlicker 0.12s ease-in-out infinite alternate;
         }
 
-        @keyframes rocketFly {
-          0% { left: 15%; bottom: 5%; opacity: 0; transform: scale(0.6); }
-          10% { opacity: 1; }
-          85% { opacity: 1; }
-          100% { left: calc(100% - 160px); bottom: calc(100% - 140px); opacity: 0; transform: scale(0.9); }
+        .rocket-trail::before {
+          content: "";
+          position: absolute;
+          top: 2px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 6px;
+          height: 20px;
+          background: linear-gradient(to bottom, #ffe880, #ffaa30, transparent);
+          border-radius: 0 0 50% 50%;
         }
 
         @keyframes trailFlicker {
-          0% { height: 35px; opacity: 0.7; }
-          100% { height: 50px; opacity: 1; }
+          0% { height: 22px; opacity: 0.7; }
+          100% { height: 32px; opacity: 1; }
+        }
+
+        /* Heart hint that drops at mid-flight */
+        .rocketHint {
+          position: absolute;
+          left: 50%;
+          top: 42%;
+          transform: translateX(-50%) translateY(-50%);
+          z-index: 12;
+          pointer-events: none;
+          opacity: 0;
+          animation: hintAppear 7s ease-in-out 1.5s both;
+        }
+
+        .rocketHint .hintHeart {
+          font-size: 28px;
+          color: #e83050;
+          text-shadow: 0 0 16px rgba(232, 48, 80, 0.5);
+          display: block;
+          text-align: center;
+          animation: hintPulse 1.2s ease-in-out infinite;
+        }
+
+        .rocketHint .hintText {
+          margin-top: 6px;
+          font-size: 0.85rem;
+          color: #f0c8d8;
+          font-style: italic;
+          text-align: center;
+          white-space: nowrap;
+          text-shadow: 0 0 12px rgba(200, 100, 150, 0.4);
+        }
+
+        @keyframes hintAppear {
+          0%, 35% { opacity: 0; transform: translateX(-50%) translateY(-30px); }
+          45%, 100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        @keyframes hintPulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.15); }
         }
 
         .star {
@@ -650,6 +841,10 @@ export default function App() {
 
         .tulipPetal { cursor: pointer; transition: filter 0.2s; }
         .tulipPetal:hover { filter: brightness(1.2); }
+        .bloom.clickable { cursor: pointer; }
+        .bloom.clickable:hover .petal,
+        .bloom.clickable:hover .budCore,
+        .bloom.clickable:hover .pollen { filter: brightness(1.2); }
 
         @keyframes songFadeIn {
           0% { opacity: 0; }
@@ -694,12 +889,33 @@ export default function App() {
           }
 
           .rocket-body {
-            font-size: 24px;
+            width: 22px;
+            height: 52px;
+          }
+          .rocket-nose {
+            border-left: 9px solid transparent;
+            border-right: 9px solid transparent;
+            border-bottom: 18px solid #e8e8f0;
+          }
+          .rocket-fuselage {
+            width: 18px;
+            height: 28px;
+            top: 16px;
+          }
+          .rocket-window {
+            top: 22px;
+            width: 7px;
+            height: 7px;
+          }
+          .rocketHint .hintText {
+            font-size: 0.75rem;
           }
         }
       `}</style>
 
-      {!started && <IntroScreen onStart={() => setStarted(true)} />}
+      {!started && <IntroScreen onStart={handleStart} />}
+
+      <audio ref={bgAudioRef} src="/Songs/bien-servida.mp3" loop preload="auto" />
 
       {/* ========== MAIN SCENE ========== */}
       {started && (
@@ -707,10 +923,35 @@ export default function App() {
           <div className="moonGlow" />
           <div className="moon" />
 
-          {/* Rocket flying to the moon */}
-          <div className="rocket">
-            <div className="rocket-body">🚀</div>
-            <div className="rocket-trail" />
+          {/* SVG flight path */}
+          <svg className="flight-svg" viewBox={isMobile ? "0 0 1000 1000" : "0 0 1000 700"} preserveAspectRatio="none">
+            <path
+              id="rocketFlightPath"
+              d={rocketCurve}
+              fill="none"
+              stroke="rgba(255,200,220,0.14)"
+              strokeWidth="2"
+              strokeDasharray="10 14"
+              strokeLinecap="round"
+            />
+          </svg>
+
+          {/* Rocket following the path */}
+          <div ref={rocketRef} className="rocket-wrap">
+            <div className="rocket-body">
+              <div className="rocket-nose" />
+              <div className="rocket-fuselage" />
+              <div className="rocket-window" />
+              <div className="rocket-fin-l" />
+              <div className="rocket-fin-r" />
+              <div className="rocket-trail" />
+            </div>
+          </div>
+
+          {/* Heart hint at mid-flight */}
+          <div className="rocketHint">
+            <span className="hintHeart">{"\u2764"}</span>
+            <span className="hintText">Haz clic en los pétalos chula</span>
           </div>
 
           {stars.map((star) => (
@@ -780,8 +1021,9 @@ export default function App() {
                     )}
 
                     <div
-                      className="bloom"
+                      className={`bloom${!isTulip ? ' clickable' : ''}`}
                       style={{ bottom: `${flower.height - 8}px` }}
+                      onClick={!isTulip ? () => setActiveMessage(flowerMessages.find(m => m.id === flower.id)) : undefined}
                     >
                       {isTulip ? (
                         <>
@@ -883,6 +1125,16 @@ export default function App() {
                   <audio ref={audioRef} src={activeSong.audioUrl} />
                 )}
                 <button className="songClose" onClick={closeSong}>Cerrar</button>
+              </div>
+            </div>
+          )}
+
+          {activeMessage && (
+            <div className="songOverlay" onClick={closeMessage}>
+              <div className="songCard" onClick={(e) => e.stopPropagation()}>
+                <div className="songNote">🌸</div>
+                <p className="songLyric">"{activeMessage.phrase}"</p>
+                <button className="songClose" onClick={closeMessage}>Cerrar</button>
               </div>
             </div>
           )}
