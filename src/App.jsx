@@ -1041,7 +1041,8 @@ export default function App() {
           {/* Heart hint at mid-flight */}
           <div className="rocketHint">
             <span className="hintHeart">{"\u2764"}</span>
-            <span className="hintText">Haz clic en los pétalos chula</span>
+            <span className="hintText">Haz clic en los pétalos chula "Espera a que termina la cancion"</span> <br /> 
+                  
             <div className="exit-area">
               {exitCountdown !== null && exitCountdown > 0 && !exitReady && (
                 <div className="exit-countdown">
